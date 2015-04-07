@@ -5,9 +5,9 @@
 #include "gent.h"
 #include "analizer.h"
 #include "manager.h"
-//#include "gens.h"
-//#include "reader.h"
-//#include "merger.h"
+
+
+
 
 static int n;
 
@@ -28,7 +28,7 @@ struct ngram *next_ngram(char **prefix, struct data *data){
 }
 
 void generate(struct data *data){
-	int i;
+	register int i;
 	int n = get_number( "mark" );
 	char **string;
 	struct ngram *prefix;
@@ -49,9 +49,16 @@ void generate(struct data *data){
 		}
 		sufix = rand_sufix( prefix );
 		string[n - 1] = strdup( sufix->sufix );
-		for( i = 0; i < n; i++ )
+		string[0][0] = toupper( string[0][0] );
+		fprintf(output, "%s ", string[0] );
+		for( i = 1; i < n; i++ )
 				fprintf(output, "%s ", string[i] );
 		prefix = next_ngram( string, data );
+		if( prefix == NULL ){
+				prefix = rand_prefix(data);
+				for( i = 0; i < n - 1; i++ )
+					string[i] = strdup( prefix->prefix[i] );
+		}
 		number_of_words -= n;
 		wrote += n;
 	
@@ -72,5 +79,7 @@ void generate(struct data *data){
 			}
 			wrote += 1;
 		}
+		if( string[n-1][strlen(string[n-1]) - 1] != '.' )
+			fprintf(output, "%c ", '.' );
 	fclose(output);
 }

@@ -4,9 +4,10 @@
 #include "analizer.h"
 #include "manager.h"
 
-static int n;
-static int number_of_words;
+
+static int 	number_of_words;
 static char *intermediate_filename;
+static int  n;
 
 void initialize_sufix( struct ngram *pointer, int i ){
 	pointer->sufixes[i] = (struct sufix *)malloc( sizeof (struct sufix) );
@@ -16,11 +17,11 @@ void initialize_sufix( struct ngram *pointer, int i ){
 }
 
 void initialize_ngram( struct data *data, int i ){
-	int j;
+	register int j;
 	data->ngrams[i] = (struct ngram *)malloc( sizeof (struct ngram) );
 	if( data->ngrams == NULL )
 		exit(EXIT_FAILURE);
-	data->ngrams[i]->prefix = (char **)malloc( (n-1) * sizeof (char *) );
+	data->ngrams[i]->prefix = (char **)malloc( (n - 1) * sizeof (char *) );
 	if( data->ngrams[i]->prefix == NULL )
 		exit(EXIT_FAILURE);
 	data->ngrams[i]->sufixes = (struct sufix **)malloc( 5 * sizeof (struct sufix *) );
@@ -110,7 +111,7 @@ char **rewrite_text_to_array( char *basefilename ){
 }
 
 struct ngram *find_ngram( char **text, struct data *data, int k ){
-	int i, j;
+	register int i, j;
 	int flag;
 	for( i = 0; i< (*data).number; i++ ){
 		flag = 0;
@@ -151,7 +152,7 @@ void add_sufix( struct ngram *pointer, char *text ){
 
 
 void add_ngram( struct data *data, char **text, int i ){
-	int j = 0;
+	register int j = 0;
 	realloc_data( data );
 	if( data->ngrams[(*data).number] == NULL ){
 		initialize_ngram( data, (*data).number );
@@ -205,9 +206,9 @@ void save_intermediate_file( struct data *data, char *filename ){
 		for( j = 0; j < n-1; j++ ){
 			fprintf(intermediate, "%s ", data->ngrams[i]->prefix[j] );
 		}
-		fprintf(intermediate, " \t%lu \t%d:", (*data->ngrams[i]).occurance, (*data->ngrams[i]).number );
+		fprintf(intermediate, " \t%d \t%d", (*data->ngrams[i]).occurance, (*data->ngrams[i]).number );
 		for( j = 0; j < (*data->ngrams[i]).number; j++ ){
-			fprintf(intermediate, " \t%s \t%lu, ", data->ngrams[i]->sufixes[j]->sufix, (*data->ngrams[i]->sufixes[j]).occurance );
+			fprintf(intermediate, " \t%s \t%d ", data->ngrams[i]->sufixes[j]->sufix, (*data->ngrams[i]->sufixes[j]).occurance );
 		}
 		fprintf(intermediate, "\n" );	
 	}
@@ -217,10 +218,13 @@ void save_intermediate_file( struct data *data, char *filename ){
 
 int process_data( char * basefile, struct data *data ){
 	char **text;
-	int i = 0;
-	intermediate_filename = strdup( "intermediate_file" );
+	register int i = 0;
+	intermediate_filename = malloc( strlen(basefile) + strlen("_intermediate") + 1 );
+	strcpy( intermediate_filename, basefile );
+	strcat( intermediate_filename, "_intermediate" );
 	n = get_number( "mark" );
-	initialize_data( data );
+	if( data->ngrams == NULL)
+		initialize_data( data );
 	text = rewrite_text_to_array( basefile );
 	process_ngrams( data, text );
 	save_intermediate_file( data, intermediate_filename );
