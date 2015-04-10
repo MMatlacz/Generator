@@ -6,7 +6,7 @@
 
 struct ngram *rand_prefix(struct data *data);
 
-struct sufix *rand_sufix(struct ngram *ngram);
+char *rand_sufix(struct ngram *ngram);
 
 struct ngram *next_ngram(char **prefix, struct data *data);
 

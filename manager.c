@@ -1,11 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <assert.h>
 #include "gent.h"
 #include "analizer.h"
 #include "manager.h"
-//#include "gens.h"
 #include "reader.h"
+//#include "gens.h"
+
 
 
 static char 	*name_text_out = NULL; 
@@ -14,8 +17,7 @@ static char 	*name_stats_out = NULL;
 static int 		number_of_words 		= 100;
 static int 		number_of_paragraphs 	= 1;
 static int 		mark 					= 2;
-static char 	*base_files[5];
-static char 	*intermediate_files[5];
+static char 	*intermediate_file_name = NULL;
 
 char *get_name( char *name ){
 	if( !strcmp( name, "out" ) )
@@ -53,7 +55,10 @@ void print_instruction(){
 int main(int argc, char const **argv){
 	register int i;
 	int it = 1;
+	int len = 0;
 	struct data data;
+	char *base_files[10];
+	char *intermediate_files[10];
 	data.ngrams = NULL;
 	data.number = 0;
 	data.capacity = 0;
@@ -64,26 +69,20 @@ int main(int argc, char const **argv){
 	while( it < argc ){
 		if( !strcmp( argv[it], "-b" ) ){
 			i = 0;
-			while( it + 1 < argc && argv[it + 1][0] != '-' && i < 5){
-				base_files[i] = strdup( argv[it + 1] );
+			while( it + 1 < argc && argv[it + 1][0] != '-' && i < 10){
+				base_files[i] = strdup( argv[it + 1]);
+				it++;
 				i++;
-				it += 1;
 			}
-			if( !strcmp( argv[it], "-b" ) ){
-				exit(EXIT_FAILURE);
-			}
-			it += 1;
+			it++;
 		} else if( !strcmp( argv[it], "-p" ) ){
 			i = 0;
-			while( it + 1 < argc && argv[it + 1][0] != '-' && i < 5){
+			while( it + 1 < argc && argv[it + 1][0] != '-' && i < 10){
 				intermediate_files[i] = strdup( argv[it + 1] );
+				it++;
 				i++;
-				it += 1;
 			}
-			if( !strcmp( argv[it], "-b" ) ){
-				exit(EXIT_FAILURE);
-			}
-			it += 1;
+			it++;
 		} else if( !strcmp( argv[it], "-g" ) ){
 			if( it + 1 < argc && argv[it + 1][0] != '-' ){
 				name_text_out =  strdup( argv[it + 1] );
@@ -131,17 +130,21 @@ int main(int argc, char const **argv){
 		}
 	}
 	i = 0;
-	while( base_files[i] != NULL ){
-		process_data( base_files[i], &data );
+	while( base_files[i] != NULL ) {
+		process_data(base_files[i], &data);
 		i++;
 	}
 	i = 0;
-	while( intermediate_files[i] != NULL ){
-		read( intermediate_files[i], &data );
+	while( intermediate_files[i] != NULL ) {
+		read(intermediate_files[i], &data);
 		i++;
 	}
 	if(name_text_out != NULL)
 		generate( &data );
+	intermediate_file_name = strdup( "inter" );
+	if( data.ngrams != NULL && data.number > 0 )
+		save_intermediate_file( &data, intermediate_file_name );
+
 	if(name_stats_in != NULL){
 		//generate_stats( data );
 	}
@@ -150,6 +153,7 @@ int main(int argc, char const **argv){
 		process_data( name_text_out, &data );
 		//generate_stats( data );
 	}
+
 	free(data.ngrams);
 	return 0;
 }

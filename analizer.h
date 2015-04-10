@@ -5,20 +5,15 @@
 struct data{
         struct ngram **ngrams;
         int number;     //liczba ngramów
-	int capacity;   //pojemność ngrams
+	    int capacity;   //pojemność ngrams
 };
 
 struct ngram{
         char **prefix;
         int occurance; //liczba wystąpień ngramu
-        struct sufix **sufixes;
+        char **sufixes;
         int number;       //liczba sufiksów
-	int capacity;     //pojemność sufixes
-};
-
-struct sufix{
-        char *sufix;    //wyraz (sufix)
-        int occurance;  //liczba wystąpień
+	    int capacity;     //pojemność sufixes
 };
 
 struct ngram *find_ngram( char **text, struct data *data, int k );
@@ -28,6 +23,7 @@ void save_intermediate_file( struct data *data, char *filename );
 int process_data( char * basefile, struct data *data );
 void initialize_data( struct data *data );
 void realloc_data( struct data *data );
-void initialize_ngram( struct data *data, int i );
+void initialize_ngram( struct data *ng );
+char **rewrite_text_to_array( char *basefilename );
 
 #endif
