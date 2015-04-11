@@ -25,5 +25,8 @@ void initialize_data( struct data *data );
 void realloc_data( struct data *data );
 void initialize_ngram( struct data *ng );
 char **rewrite_text_to_array( char *basefilename );
+void setN( int value );
+void add_prefix( struct ngram *pointer, char **text, int position );
+void realloc_sufixes( struct ngram *ngram );
 
 #endif

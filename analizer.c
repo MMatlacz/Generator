@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 #include "analizer.h"
 #include "manager.h"
 
@@ -10,6 +11,9 @@ static int 	number_of_words;
 static char *intermediate_filename;
 static int  n;
 
+void setN( int value ){
+	n = value;
+}
 
 void save_intermediate_file( struct data *data, char *filename ){
 	register int i, j;
@@ -17,6 +21,7 @@ void save_intermediate_file( struct data *data, char *filename ){
 	intermediate = fopen( filename, "w" );
 	if ( intermediate == NULL )
 		exit(EXIT_FAILURE);
+	fprintf(intermediate, "%d\n", n);
 	for( i = 0; i < (*data).number; i++ ){
 		j = 0;
 		for( j = 0; j < n-1; j++ ){
@@ -84,7 +89,11 @@ char **rewrite_text_to_array( char *basefilename ){
 	fseek(file, 0, SEEK_END);
 	size = ftell(file);
 	rewind(file);
-
+	if( size == 0) {
+		fprintf(stderr, "Plik %s nie zawiera tekstu", basefilename);
+		text = NULL;
+		return text;
+	}
 	content = calloc(size + 1, 1);
 
 	fread(content,1,size,file);
@@ -132,11 +141,14 @@ void initialize_data( struct data *data ){
 
 void realloc_data( struct data *data ){
 	struct ngram **temp = NULL;
+	int i = 0;
 	if( data->number == data->capacity ){
 		data->capacity *= 2;
 		temp = realloc( data->ngrams, data->capacity * sizeof *temp );
 		assert( temp != NULL );
 		data->ngrams = temp;
+		for( i = data->number; i < data->capacity; i++ )
+			data->ngrams[i] = NULL;
 	}
 }
 
@@ -220,11 +232,12 @@ void process_ngrams( struct data *data, char **text ){
 
 int process_data( char * basefile, struct data *data ){
 	char **text;
-	register int i = 0;
 	n = get_number( "mark" );
 	if( data->ngrams == NULL)
 		initialize_data( data );
 	text = rewrite_text_to_array( basefile );
+	if( text == NULL )
+		return 1;
 	process_ngrams( data, text );
 
 	return 0;

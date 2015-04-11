@@ -134,16 +134,19 @@ int main(int argc, char const **argv){
 		process_data(base_files[i], &data);
 		i++;
 	}
+
+	intermediate_file_name = strdup( "inter" );
+	if( data.ngrams != NULL && data.number > 0 )
+		save_intermediate_file( &data, intermediate_file_name );
+
 	i = 0;
 	while( intermediate_files[i] != NULL ) {
 		read(intermediate_files[i], &data);
 		i++;
 	}
-	if(name_text_out != NULL)
+	if(name_text_out != NULL && data.number != 0)
 		generate( &data );
-	intermediate_file_name = strdup( "inter" );
-	if( data.ngrams != NULL && data.number > 0 )
-		save_intermediate_file( &data, intermediate_file_name );
+
 
 	if(name_stats_in != NULL){
 		//generate_stats( data );
