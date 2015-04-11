@@ -8,11 +8,22 @@
 
 
 static int 	number_of_words;
-static char *intermediate_filename;
 static int  n;
 
 void setN( int value ){
 	n = value;
+}
+
+void removeSpaces(char *source){
+	char *i = source;
+	char *j = source;
+	while( *j != 0 )
+	{
+		*i = *j++;
+		if( *i != ' ' )
+			i++;
+	}
+	*i = 0;
 }
 
 void save_intermediate_file( struct data *data, char *filename ){
@@ -23,7 +34,6 @@ void save_intermediate_file( struct data *data, char *filename ){
 		exit(EXIT_FAILURE);
 	fprintf(intermediate, "%d\n", n);
 	for( i = 0; i < (*data).number; i++ ){
-		j = 0;
 		for( j = 0; j < n-1; j++ ){
 			fprintf(intermediate, "%s ", data->ngrams[i]->prefix[j] );
 			j++;
@@ -38,41 +48,21 @@ void save_intermediate_file( struct data *data, char *filename ){
 	fclose(intermediate);
 }
 
-/*
-char* readFile(char* filename)
-{
-    FILE* file = fopen(filename,"r");
-    if(file == NULL)
-    {
-        return NULL;
-    }
 
-    fseek(file, 0, SEEK_END);
-    long int size = ftell(file);
-    rewind(file);
 
-    char* content = calloc(size + 1, 1);
-
-    fread(content,1,size,file);
-
-    return content;
-}
-*/
-char *trimwhitespace(char *str)
-{
+char *trimwhitespace(char *str){
 	char *end;
 
-	// Trim leading space
-	while(isspace(*str)) str++;
+	while(isspace(*str))
+		str++;
 
-	if(*str == 0)  // All spaces?
+	if(*str == 0)
 		return str;
 
-	// Trim trailing space
 	end = str + strlen(str) - 1;
-	while(end > str && isspace(*end)) end--;
+	while(end > str && isspace(*end))
+		end--;
 
-	// Write new null terminator
 	*(end+1) = 0;
 
 	return str;
@@ -130,7 +120,6 @@ void initialize_ngram( struct data *ng ){
 }
 
 void initialize_data( struct data *data ){
-	int i = 0;
 	struct ngram **tmp;
 	tmp = malloc( 20 * sizeof *tmp);
 	assert( tmp != NULL );
@@ -184,7 +173,6 @@ struct ngram *find_ngram( char **text, struct data *data, int k ){
 }
 
 void add_sufix( struct ngram *pointer, char *text ){
-	int i = 0;
 	realloc_sufixes( pointer );
 	pointer->sufixes[(*pointer).number] = strdup( text );
 	(*pointer).number++;
@@ -199,7 +187,6 @@ void add_prefix( struct ngram *pointer, char **text, int position ){
 }
 
 void add_ngram( struct data *data, char **text, int position ){
-	register int i = 0;
 	int sufix_pos = n - 1;
 	initialize_ngram( data );
 	add_prefix( data->ngrams[data->number], text, position );

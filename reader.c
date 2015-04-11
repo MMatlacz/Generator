@@ -4,6 +4,7 @@
 #include <string.h>
 #include "analizer.h"
 #include "reader.h"
+#include "manager.h"
 
 static int n = 0;
 static FILE *file = NULL;
@@ -89,6 +90,11 @@ void read( char *ifile, struct data *d ){
         fprintf(stderr, "Plik %s jest nieprawidłowy", ifile);
         return;
     }
+    if( n != get_number("mark") ){
+        fprintf(stderr, "Ngramy w pliku pośrednim %s mają nieprawidłowy stopień %d oczekiwano %d ", ifile, n, get_number("mark") );
+        return;
+    }
+
     setN( n );
     position++;
     if( d->ngrams == NULL)

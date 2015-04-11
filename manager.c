@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <assert.h>
 #include "gent.h"
-#include "analizer.h"
 #include "manager.h"
 #include "reader.h"
 //#include "gens.h"
@@ -35,6 +33,8 @@ int get_number( char *name ){
 		return number_of_paragraphs;
 	else if( !strcmp( name, "mark" ) ) 
 		return mark;
+	else
+		exit(EXIT_FAILURE);
 }
 				
 
@@ -55,10 +55,10 @@ void print_instruction(){
 int main(int argc, char const **argv){
 	register int i;
 	int it = 1;
-	int len = 0;
 	struct data data;
 	char *base_files[10];
 	char *intermediate_files[10];
+	time_t curtime;
 	data.ngrams = NULL;
 	data.number = 0;
 	data.capacity = 0;
@@ -129,21 +129,28 @@ int main(int argc, char const **argv){
 			break;
 		}
 	}
+
 	i = 0;
 	while( base_files[i] != NULL ) {
 		process_data(base_files[i], &data);
 		i++;
 	}
 
-	intermediate_file_name = strdup( "inter" );
-	if( data.ngrams != NULL && data.number > 0 )
-		save_intermediate_file( &data, intermediate_file_name );
-
 	i = 0;
 	while( intermediate_files[i] != NULL ) {
 		read(intermediate_files[i], &data);
 		i++;
 	}
+
+
+	time(&curtime);
+	intermediate_file_name = ctime(&curtime);
+	removeSpaces( intermediate_file_name );
+	intermediate_file_name = trimwhitespace(intermediate_file_name);
+
+	if( data.ngrams != NULL && data.number > 0 )
+		save_intermediate_file( &data, intermediate_file_name );
+
 	if(name_text_out != NULL && data.number != 0)
 		generate( &data );
 
@@ -151,6 +158,7 @@ int main(int argc, char const **argv){
 	if(name_stats_in != NULL){
 		//generate_stats( data );
 	}
+
 	if(name_stats_out != NULL){
 		free(data.ngrams);
 		process_data( name_text_out, &data );
