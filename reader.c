@@ -43,7 +43,7 @@ void add_ngram_r( struct data *data, char **text ){
     data->number += 1;
 }
 
-void read( char *ifile, struct data *d ){
+void read( char *ifile, struct data *d ) {
     int i = 0;
     long int size = 0;
     int numberOfSufixes = 0;
@@ -55,54 +55,53 @@ void read( char *ifile, struct data *d ){
     struct ngram *pointer = NULL;
     numberOfWords = 0;
     position = 0;
-    file = fopen(ifile,"r");
-    if(file == NULL)
-    {
+    file = fopen(ifile, "r");
+    if (file == NULL) {
         return;
     }
 
     fseek(file, 0, SEEK_END);
     size = ftell(file);
     rewind(file);
-    if( size == 0) {
+    if (size == 0) {
         fprintf(stderr, "Plik %s nie zawiera tekstu", ifile);
         return;
     }
     content = calloc(size + 1, 1);
 
-    fread(content,1,size,file);
+    fread(content, 1, size, file);
     fclose(file);
-    text = (char **)malloc( (size + 1) * sizeof( char *) );
+    text = malloc((size + 1) * sizeof *text);
     i = 0;
-    string = strtok (content, " \n");
-    while (string != NULL)
-    {
-        text[i] = strdup( string );
+    string = strtok(content, " \n");
+    while (string != NULL) {
+        text[i] = strdup(string);
         i++;
-        string = strtok (NULL, " \n");
+        string = strtok(NULL, " \n");
     }
-    while( text[numberOfWords] != NULL )
+    while (text[numberOfWords] != NULL)
         numberOfWords++;
-    if(numberOfWords == 0)
+    if (numberOfWords == 0)
         return;
-    n = atoi( text[position] );
-    if( n == 0 ){
+    n = atoi(text[position]);
+    if( n == 0 ) {
         fprintf(stderr, "Plik %s jest nieprawidłowy", ifile);
         return;
     }
-    if( n != get_number("mark") ){
-        fprintf(stderr, "Ngramy w pliku pośrednim %s mają nieprawidłowy stopień %d oczekiwano %d ", ifile, n, get_number("mark") );
+    if ( n != get_number("m") ) {
+        fprintf(stderr, "Ngramy w pliku pośrednim %s mają nieprawidłowy stopień %d oczekiwano %d ", ifile, n,
+                get_number("m"));
         return;
     }
 
-    setN( n );
+    setN(n);
     position++;
-    if( d->ngrams == NULL)
-        initialize_data( d );
+    if (d->ngrams == NULL)
+        initialize_data(d);
 
 
-    while( text[position] != NULL ) {
-        pointer = find_ngram( text, d, position );
+    while (text[position] != NULL) {
+        pointer = find_ngram(text, d, position);
         if (pointer != NULL) {
             position += n - 1;
             numberOfPrefixesOccurance = atoi(text[position]);
@@ -122,6 +121,7 @@ void read( char *ifile, struct data *d ){
     }
 
     return;
-
 }
+
+
 

@@ -4,11 +4,11 @@
 #define _INCL_GENERATOR
 
 
-struct ngram *rand_prefix(struct data *data);
+struct ngram *randPrefix(struct data *data);
 
-char *rand_sufix(struct ngram *ngram);
+char *randSufix(struct ngram *ngram);
 
-struct ngram *next_ngram(char **prefix, struct data *data);
+struct ngram *nextNgram(char **prefix, struct data *data);
 
 void generate(struct data *data);
 

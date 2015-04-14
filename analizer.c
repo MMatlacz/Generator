@@ -7,11 +7,37 @@
 #include "manager.h"
 
 
-static int 	number_of_words;
+
+static int 	numberOfWords;
 static int  n;
 
 void setN( int value ){
 	n = value;
+}
+
+void save_intermediate_file( struct data *d, char *filename ){
+	register int i, j;
+	FILE *intermediate;
+	intermediate = fopen( filename, "w" );
+	n = get_number("m");
+	if ( intermediate == NULL ) {
+		fprintf(stderr, "Nie udało się otworzyć pliku %s do zapisu pliku pośredniego", filename);
+		return;
+	}
+	fprintf(intermediate, "%d\n", n);
+	for( i = 0; i < d->number; i++ ){
+		for( j = 0; j < n - 1; j++ ){
+			fprintf(intermediate, "%s ", d->ngrams[i]->prefix[j] );
+			j++;
+		}
+		fprintf(intermediate, "%d %d ", d->ngrams[i]->occurance, d->ngrams[i]->number );
+		for( j = 0; j < d->ngrams[i]->number; j++ ){
+			fprintf(intermediate, "%s ", d->ngrams[i]->sufixes[j] );
+		}
+		fprintf(intermediate, "\n" );
+	}
+
+	fclose(intermediate);
 }
 
 void removeSpaces(char *source){
@@ -20,35 +46,11 @@ void removeSpaces(char *source){
 	while( *j != 0 )
 	{
 		*i = *j++;
-		if( *i != ' ' )
+		if( *i != ' ' && *i != ':' )
 			i++;
 	}
 	*i = 0;
 }
-
-void save_intermediate_file( struct data *data, char *filename ){
-	register int i, j;
-	FILE *intermediate;
-	intermediate = fopen( filename, "w" );
-	if ( intermediate == NULL )
-		exit(EXIT_FAILURE);
-	fprintf(intermediate, "%d\n", n);
-	for( i = 0; i < (*data).number; i++ ){
-		for( j = 0; j < n-1; j++ ){
-			fprintf(intermediate, "%s ", data->ngrams[i]->prefix[j] );
-			j++;
-		}
-		fprintf(intermediate, "%d %d ", data->ngrams[i]->occurance, data->ngrams[i]->number );
-		for( j = 0; j < (*data->ngrams[i]).number; j++ ){
-			fprintf(intermediate, "%s ", data->ngrams[i]->sufixes[j] );
-		}
-		fprintf(intermediate, "\n" );
-	}
-
-	fclose(intermediate);
-}
-
-
 
 char *trimwhitespace(char *str){
 	char *end;
@@ -98,7 +100,7 @@ char **rewrite_text_to_array( char *basefilename ){
 		string = strtok (NULL, " \n\r\t");
 		i++;
 	}
-	number_of_words = i;
+	numberOfWords = i;
 	return text;
 }
 
@@ -146,8 +148,10 @@ void realloc_sufixes( struct ngram *ngram ){
 	if( (*ngram).capacity == (*ngram).number ){
 		ngram->capacity *= 2;
 		temp = realloc( ngram->sufixes, ngram->capacity * sizeof *temp );
-		if( temp == NULL )
+		if( temp == NULL ) {
+			fprintf(stderr, "Błąd alokacji pamięci w funkcji realloc_sufixes");
 			exit(EXIT_FAILURE);
+		}
 		ngram->sufixes = temp;
 	}
 }
@@ -203,12 +207,13 @@ void process_ngrams( struct data *data, char **text ){
 	//data - kontener z ngramami, text - wektor zawierający tekst
 	struct ngram *pointer = NULL;
 	register int i = 0;
-	while( number_of_words - i >= n ){
+	while( numberOfWords - i >= n ){
 		//sprawdzam czy ngram juz wystepuje
 		pointer = find_ngram( text, data, i );//zwraca wskaźnik do występującego ngramu 
 		//jeżeli ngram już jest lub NULL jeżeli go jeszcze nie ma
 		if( pointer != NULL ){
 			add_sufix( pointer, text[i+n-1] ); //dodaje sufix do istniejącego ngramu
+			pointer->occurance++;
 		} else {
 			realloc_data( data );
 			add_ngram( data, text, i ); //dodaje nowy ngram
@@ -217,16 +222,16 @@ void process_ngrams( struct data *data, char **text ){
 	}
 }
 
-int process_data( char * basefile, struct data *data ){
+int process_data( char * basefile, struct data *d ){
 	char **text;
-	n = get_number( "mark" );
-	if( data->ngrams == NULL)
-		initialize_data( data );
+	n = get_number( "m" );
+	if( d->ngrams == NULL)
+		initialize_data( d );
 	text = rewrite_text_to_array( basefile );
 	if( text == NULL )
 		return 1;
-	process_ngrams( data, text );
-
+	process_ngrams( d, text );
+	d->numberOfWords += numberOfWords;
 	return 0;
 
 }
