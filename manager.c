@@ -142,6 +142,12 @@ int main(int argc, char const **argv){
 		}
 	}
 
+	if( intermediate_files[0] == NULL && base_files[0] == NULL ){
+		fprintf(stderr, "Nie podano żadnych plików wejściowych\n");
+		print_instruction();
+		exit(EXIT_FAILURE);
+	}
+
 	i = 0;
 	while( base_files[i] != NULL ) {
 		printf("*Przetwarzanie pliku bazowego %d\n", i+1);
@@ -189,8 +195,22 @@ int main(int argc, char const **argv){
 		//process_data( name_text_out, &data );
 		//generate_stats( data );
 	}
-
-	free(data.ngrams);
+	for( i = 0; i < data.number; i++ ){
+		for( it = 0; it < data.ngrams[i]->number; it++ ){
+			free(data.ngrams[i]->sufixes[it]);
+		}
+		free(data.ngrams[i]->sufixes);
+		for( it = 0; it < mark - 1; it++ ){
+			free(data.ngrams[i]->prefix[it]);
+		}
+		free(data.ngrams[i]->prefix);
+		free(data.ngrams[i]);
+	}
+	free(intermediate_file_name);
+	for( i = 0; i < 10; i++ ){
+		free( base_files[i] );
+		free(intermediate_files[i]);
+	}
 	printf("GOTOWE!\n");
 	return 0;
 }

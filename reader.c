@@ -85,11 +85,11 @@ void read( char *ifile, struct data *d ) {
         return;
     n = atoi(text[position]);
     if( n == 0 ) {
-        fprintf(stderr, "Plik %s jest nieprawidłowy", ifile);
+        fprintf(stderr, "Plik %s jest nieprawidłowy\n", ifile);
         return;
     }
     if ( n != get_number("m") ) {
-        fprintf(stderr, "Ngramy w pliku pośrednim %s mają nieprawidłowy stopień %d oczekiwano %d ", ifile, n,
+        fprintf(stderr, "Ngramy w pliku pośrednim %s mają nieprawidłowy stopień %d oczekiwano %d \n", ifile, n,
                 get_number("m"));
         return;
     }

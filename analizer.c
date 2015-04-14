@@ -94,7 +94,7 @@ char **rewrite_text_to_array( char *basefilename ){
 
 	fread(content,1,size,file);
 	fclose(file);
-	text = (char **)malloc( (size + 1) * sizeof( char *) );
+	text = malloc( (size + 1) * sizeof *text );
 	i = 0;
 	string = strtok (content, " \n\r\t");
 	while (string != NULL)
@@ -105,6 +105,7 @@ char **rewrite_text_to_array( char *basefilename ){
 		i++;
 	}
 	numberOfWords = i;
+	free(content);
 	return text;
 }
 
@@ -137,6 +138,7 @@ void initialize_data( struct data *data ){
 void realloc_data( struct data *data ){
 	struct ngram **temp = NULL;
 	int i = 0;
+	int j = 0;
 	if( data->number == data->capacity ){
 		data->capacity *= 2;
 		temp = realloc( data->ngrams, data->capacity * sizeof *temp );
@@ -149,6 +151,7 @@ void realloc_data( struct data *data ){
 
 void realloc_sufixes( struct ngram *ngram ){
 	char **temp = NULL;
+	int i = 0;
 	if( (*ngram).capacity == (*ngram).number ){
 		ngram->capacity *= 2;
 		temp = realloc( ngram->sufixes, ngram->capacity * sizeof *temp );
@@ -157,13 +160,16 @@ void realloc_sufixes( struct ngram *ngram ){
 			exit(EXIT_FAILURE);
 		}
 		ngram->sufixes = temp;
+		for( i = ngram->number; i < ngram->capacity; i++ ){
+			ngram->sufixes[i] = NULL;
+		}
 	}
 }
 
 struct ngram *find_ngram( char **text, struct data *data, int k ){
 	register int i, j;
 	int flag;
-	for( i = 0; i< (*data).number; i++ ){
+	for( i = 0; i< data->number; i++ ){
 		flag = 0;
 		for( j = 0; j < n - 1; j++ ){
 			if( strcmp( data->ngrams[i]->prefix[j], text[k+j] ) == 0){
@@ -183,7 +189,7 @@ struct ngram *find_ngram( char **text, struct data *data, int k ){
 void add_sufix( struct ngram *pointer, char *text ){
 	realloc_sufixes( pointer );
 	pointer->sufixes[(*pointer).number] = strdup( text );
-	(*pointer).number++;
+	pointer->number++;
 }
 
 void add_prefix( struct ngram *pointer, char **text, int position ){
@@ -228,6 +234,7 @@ void process_ngrams( struct data *data, char **text ){
 
 int process_data( char * basefile, struct data *d ){
 	char **text;
+	int i = 0;
 	n = get_number( "m" );
 	if( d->ngrams == NULL)
 		initialize_data( d );
@@ -236,6 +243,11 @@ int process_data( char * basefile, struct data *d ){
 		return 1;
 	process_ngrams( d, text );
 	d->numberOfWords += numberOfWords;
+	while( text[i] != NULL ){
+		free(text[i]);
+		i++;
+	}
+	free(text);
 	return 0;
 
 }
