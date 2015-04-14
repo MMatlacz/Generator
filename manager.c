@@ -179,14 +179,14 @@ int main(int argc, char const **argv){
 	}
 
 	if(name_stats_in != NULL){
-		printf("*Generowanie statystyk wejściowych %s\n", name_stats_in);
-		generateStats(&data, name_stats_in, base_files, intermediate_files);
+		//printf("*Generowanie statystyk wejściowych %s\n", name_stats_in);
+		//generateStats(&data, name_stats_in, base_files, intermediate_files);
 	}
 
 	if(name_stats_out != NULL){
-		printf("*Generowanie statystyk wyjściowych %s\n", name_stats_out);
-		free(data.ngrams);
-		process_data( name_text_out, &data );
+		//printf("*Generowanie statystyk wyjściowych %s\n", name_stats_out);
+		//free(data.ngrams);
+		//process_data( name_text_out, &data );
 		//generate_stats( data );
 	}
 
