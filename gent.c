@@ -5,83 +5,113 @@
 #include <time.h>
 #include <ctype.h>
 #include "gent.h"
-#include "analizer.h"
 #include "manager.h"
 
 
 
 
 static int n = 0;
+static int numberOfWords;
+static int numberOfParagraphs;
+static int wordsInParagraph;
+static int lefOvers;
+static int wrote;
 
-struct ngram *rand_prefix(struct data *data){
+struct ngram *randPrefix(struct data *data){
 	return data->ngrams[ (int)((*data).number * 1.0 * rand()/RAND_MAX) ];
 }
 
-char *rand_sufix(struct ngram *ngram){
+char *randSufix(struct ngram *ngram){
 	return ngram->sufixes[ (int)((*ngram).number * 1.0 * rand()/RAND_MAX) ];
 }
 
-struct ngram *next_ngram(char **prefix, struct data *data){
-	struct ngram *tmp = find_ngram( prefix, data, 1 );
+struct ngram *nextNgram(char **prefix, struct data *d){
+	struct ngram *tmp = find_ngram( prefix, d, 1 );
 	if( tmp != NULL)
 		return tmp;
 	else
 		return NULL;
 }
 
+void copyPrefix( struct ngram *p, char **s ){ //zwraca liczbę skopiowanych wyrazów
+	int i;
+	for(i = 0; i < n - 1; i++) {
+		s[i] = strdup( p->prefix[i] ); //przekopiuj prefix do stringa
+	}
+}
+
 void generate(struct data *data){
 	register int i;
-	n = get_number( "mark" );
 	char **string;
 	struct ngram *prefix;
 	char *sufix;
-	int number_of_words = get_number( "words" );
-	char *out = strdup( get_name( "out" ) );
-	int wrote = 0;
+	char *out;
+	out = strdup( get_name( "out" ) );
+	numberOfWords = get_number( "w" );
+	numberOfParagraphs = get_number( "p" );
+	wordsInParagraph = numberOfWords / numberOfParagraphs;
+	lefOvers = numberOfWords - numberOfParagraphs * wordsInParagraph;
 	FILE *output;
 	output = fopen( out, "w" );
 	srand(time(NULL));
-	string = (char **)malloc(n * sizeof (char *) );
-	
-		prefix = rand_prefix(data);
-		for( i = 0; i < n - 1; i++){
-			if( prefix->prefix != NULL ){
-				string[i] = strdup( prefix->prefix[i] );
+	string = malloc(n * sizeof *string );
+	n = get_number("m");
+	while( numberOfParagraphs-- ) {
+		if(numberOfParagraphs == 0){
+			wordsInParagraph += lefOvers;
+		}
+		fprintf(output, "\t");
+		while( wrote < wordsInParagraph ){
+			//jeżeli nie ma jescze żadnych wypisanych wyrazów to wylosuj pierwszy
+			if (wrote == 0) {
+				prefix = randPrefix(data);
+				copyPrefix(prefix, string);
+				string[0][0] = (char) toupper(string[0][0]); //Zmien pierwsza litere na wielka
+				for (i = 0; i < n - 1; i++) {
+					fprintf(output, "%s ", string[i]); //Wypisz prefix
+					if( ++wrote >= wordsInParagraph )
+						break;
+					if (wrote % 8 == 0) { //Wypisuj tylko 8 wyrazów w wierszu
+						fprintf(output, "\n");
+					}
+				}
+			} else {
+				//Jeżeli wypisano już jakieś słowa to znajdź kolejny ngram
+				prefix = nextNgram(string, data);
+				if (prefix == NULL) {
+					prefix = randPrefix(data);
+					copyPrefix(prefix, string);
+					for (i = 0; i < n - 1; i++) {
+						fprintf(output, "%s ", string[i]); //Wypisz prefix
+						if( ++wrote >= wordsInParagraph )
+							break;
+						if (wrote % 8 == 0) { //Wypisuj tylko 8 wyrazów w wierszu
+							fprintf(output, "\n");
+						}
+					}
+				}
+			}
+
+			sufix = randSufix(prefix); //znajdz odpowiadajacy sufix
+			string[n - 1] = strdup(sufix);
+			fprintf(output, "%s ", string[n - 1]); //wypisz sufix
+			if( ++wrote >= wordsInParagraph )
+				break;
+			if (wrote % 8 == 0) { //Wypisuj tylko 8 wyrazów w wierszu
+				fprintf(output, "\n");
+			}
+			for (i = 1; i < n; i++) {
+				string[i - 1] = strdup(string[i]);
 			}
 		}
-		sufix = rand_sufix( prefix );
-		string[n - 1] = strdup( sufix );
-		string[0][0] = (char) toupper( string[0][0] );
-		fprintf(output, "%s ", string[0] );
-		for( i = 1; i < n; i++ )
-				fprintf(output, "%s ", string[i] );
-		prefix = next_ngram( string, data );
-		if( prefix == NULL ){
-				prefix = rand_prefix(data);
-				for( i = 0; i < n - 1; i++ )
-					string[i] = strdup( prefix->prefix[i] );
-		}
-		number_of_words -= n;
-		wrote += n;
-	
-		while(number_of_words--){
-			if( wrote % 8 == 0 )
-				fprintf( output, "\n" );
-			for( i = 1; i < n; i++ ){
-				string[i - 1] = strdup( string[ i ] );
-			}
-			sufix = rand_sufix( prefix );
-			string[n - 1] = strdup( sufix );
-			fprintf(output, "%s ", string[n - 1] );
-			prefix = next_ngram( string, data );
-			if( prefix == NULL ){
-				prefix = rand_prefix(data);
-				for( i = 0; i < n - 1; i++ )
-					string[i] = strdup( prefix->prefix[i] );
-			}
-			wrote += 1;
-		}
+
 		if( string[n-1][strlen(string[n-1]) - 1] != '.' )
-			fprintf(output, "%c ", '.' );
+			fprintf(output, "." );
+		if( numberOfParagraphs > 0)
+			fprintf(output, "\n");
+		wrote = 0;
+	}
+
+
 	fclose(output);
 }

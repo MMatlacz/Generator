@@ -6,7 +6,8 @@ struct data{
         struct ngram **ngrams;
         int number;     //liczba ngramów
 	    int capacity;   //pojemność ngrams
-};
+        int numberOfWords; //liczba wyrazów przetworzonych tekstów
+        };
 
 struct ngram{
         char **prefix;
@@ -28,5 +29,7 @@ char **rewrite_text_to_array( char *basefilename );
 void setN( int value );
 void add_prefix( struct ngram *pointer, char **text, int position );
 void realloc_sufixes( struct ngram *ngram );
+char *trimwhitespace(char *str);
+void removeSpaces(char* source);
 
 #endif
