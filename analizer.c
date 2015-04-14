@@ -46,8 +46,12 @@ void removeSpaces(char *source){
 	while( *j != 0 )
 	{
 		*i = *j++;
-		if( *i != ' ' && *i != ':' )
+		if( *i != ' '  ){
+			if( *i == ':'){
+				*i = '-';
+			}
 			i++;
+		}
 	}
 	*i = 0;
 }

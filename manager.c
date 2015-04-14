@@ -170,28 +170,27 @@ int main(int argc, char const **argv){
 
 		if( data.ngrams != NULL && data.number > 0 )
 			save_intermediate_file( &data, intermediate_file_name );
-		printf("Plik pośredni gotowy\n");
 	}
 
 
 	if(name_text_out != NULL && data.number != 0) {
-		printf("*Generowanie tekstu %s", name_text_out);
+		printf("*Generowanie tekstu %s\n", name_text_out);
 		generate(&data);
 	}
 
 	if(name_stats_in != NULL){
-		printf("*Generowanie statystyk wejściowych %s", name_stats_in);
+		printf("*Generowanie statystyk wejściowych %s\n", name_stats_in);
 		generateStats(&data, name_stats_in, base_files, intermediate_files);
 	}
 
 	if(name_stats_out != NULL){
-		printf("*Generowanie statystyk wyjściowych %s", name_stats_out);
+		printf("*Generowanie statystyk wyjściowych %s\n", name_stats_out);
 		free(data.ngrams);
 		process_data( name_text_out, &data );
 		//generate_stats( data );
 	}
 
 	free(data.ngrams);
-	printf("GOTOWE!");
+	printf("GOTOWE!\n");
 	return 0;
 }
